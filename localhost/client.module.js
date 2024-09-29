@@ -23,7 +23,7 @@ import {
 import {
     f_s_hms__from_n_ts_ms_utc,
 } from "https://deno.land/x/date_functions@1.4/mod.js"
-import { O_image } from "./classes.module.js"
+import { f_o_image } from "./functions.module.js"
 
 let o_folder__root = await ( await fetch('./f_o_folder', {method: "post", body: JSON.stringify({s_path: '/'})})).json();
 let a_o_folder__path = [
@@ -38,7 +38,6 @@ let o_state = {
     a_o_entry: [],
     o_entry: null,
     s_name_img: '', 
-    s_name_path: '/home/legion5pro/Pictures/test', 
     n_idx_a_o_entry: 0,
 }
 
@@ -158,7 +157,7 @@ let f_o_image_from_s_path = async function(s_path){
             let o_image = o_state.a_o_image.find(o=>o.s_path == s_path);
             if(!o_image){
 
-                let o_js_image_element = await f_o_image_from_s_src(`./f_o_img?s_path=${s_path}`);
+                let o_js_image_element = await f_o_image_from_s_src(`./f_o_img?s_path=${s_path}&b_thumbnail_only=true`);
                 let o_canvas = document.createElement('canvas');
                 o_canvas.width = o_js_image_element.width;
                 o_canvas.height = o_js_image_element.height;
@@ -166,7 +165,7 @@ let f_o_image_from_s_path = async function(s_path){
                 o_ctx.drawImage(o_js_image_element, 0, 0);
                 o_canvas.toBlob(function(o_blob) {
                   let o_object_url = URL.createObjectURL(o_blob);
-                  o_image = new O_image(s_path, o_js_image_element, o_object_url);
+                  o_image = f_o_image(s_path, o_js_image_element, o_object_url);
                   o_state.a_o_image.push(o_image) 
                   return f_res(o_image)
                 }); 
@@ -396,7 +395,7 @@ let o = await f_o_html__and_make_renderable(
                                     (o1, o2)=>{
                                         o1.name.localeCompare(o2.name)
                                     }
-                                )g
+                                )
                             }
                             if(s == 'created'){
                                 o_state.a_o_entry = o_state.a_o_entry.sort(
@@ -568,7 +567,7 @@ let f_update_from_n_idx_a_o_entry = async function(n_idx){
     o_state.n_idx_a_o_entry = f_n_idx_ensured_inside_array(n_idx, o_state.a_o_entry.length);
 
     o_state.o_entry = o_state.a_o_entry[o_state.n_idx_a_o_entry];
-    o_state.o_image = await f_o_image_from_s_path(`${o_state.s_name_path}/${o_state.o_entry?.name}`);
+    o_state.o_image = await f_o_image_from_s_path(`${o_state.a_o_folder__path.map(o=>o.o_entry.name).join('/')}/${o_state.o_entry?.name}`);
     o_state.o_entry.o_image = o_state.o_image;
 
     await o_state.o_js__img._f_render();

@@ -14,3 +14,47 @@
 // export {
 //     f_n_sum
 // }
+let f_o_entry = function(
+    name,
+    o_stat
+){
+    return {
+        name,
+        o_stat,
+    }
+}
+let f_o_folder = function(
+    o_entry,
+    a_o_entry
+){
+    return {
+        o_entry, 
+        a_o_entry,
+    }
+}
+
+
+let f_o_image = function(
+    s_path,
+    o_js_image_element,
+    o_object_url, 
+    s_data_url_jpg_thumb
+){
+    return { 
+        s_path,
+        o_js_image_element,
+        o_object_url, 
+        s_data_url_jpg_thumb
+    }
+}
+let f_o_data = function(a_o_image){
+    return {
+        a_o_image
+    }
+};
+export {
+    f_o_folder, 
+    f_o_image,
+    f_o_data, 
+    f_o_entry,
+}
