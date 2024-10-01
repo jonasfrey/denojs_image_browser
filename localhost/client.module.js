@@ -9,9 +9,14 @@ import {
 import {
     f_o_html__and_make_renderable,
 }
-// from 'https://deno.land/x/f_o_html_from_o_js@3.7/mod.js'
-from './otmp.js'
+from 'https://deno.land/x/f_o_html_from_o_js@3.9/mod.js'
 
+let o_module = await import('https://deno.land/x/f_o_html_from_o_js@3.9/jsh_modules/translatable_scalable_window/mod.js');
+
+
+
+
+document.body.appendChild(o)
 import {
     f_o_webgl_program,
     f_delete_o_webgl_program,
@@ -30,6 +35,13 @@ let a_o_folder__path = [
     o_folder__root
 ];
 let o_state = {
+    o_dedicated_to_overlay: {
+        o_scl: {n_x: 500, n_y: 500}, 
+        o_trn: {n_x: 200, n_y: 200}, 
+        a_s_css_propval: [
+            'background: blue'
+        ]
+    },
     o_webgl_program: null,
     a_o_folder__path,
     o_folder__root,
@@ -220,6 +232,70 @@ let o = await f_o_html__and_make_renderable(
                             return {
                                 style: "display:flex; align-items: row;", 
                                 a_o: [
+                                    {
+                                        a_o: [
+                                            o_module.f_o_js( // this will add the variables to the state
+                                                [
+                                                ... (new Array(20)).fill(0).map(
+                                                    n =>{
+                                                        let s_rel_x = ['left', 'right'][parseInt(Math.random()*2)]
+                                                        let s_rel_y = ['top', 'bottom'][parseInt(Math.random()*2)]
+                                                        let n_x_nor = Math.random()*50;
+                                                        let n_y_nor = Math.random()*50;
+                                                        let s = ['scl', 'trn'][parseInt(Math.random()*2)];
+                                
+                                                        return {
+                                                            s_tag: "button", 
+                                                            style: `position:absolute; ${s_rel_x}:${n_x_nor}%;${s_rel_y}:${n_y_nor}%`,
+                                                            onpointerdown: (o_e)=>{o_module[`f_update_pointerdown_${s}`](
+                                                                o_state.o_dedicated_to_overlay, 
+                                                                o_e
+                                                            )},
+                                                            innerText: s
+                                                          }
+                                                    }
+                                                ),
+                                                  {
+                                                    s_tag: "button", 
+                                                    style: "position:absolute; top:0;left:0",
+                                                    onpointerdown: (o_e)=>{o_module.f_update_pointerdown_scl(
+                                                        o_state.o_dedicated_to_overlay, 
+                                                        o_e
+                                                    )},
+                                                    innerText: 'scale',
+                                                  }, 
+                                                  {
+                                                    s_tag: "button", 
+                                                    style: "position:absolute; top:0;right:0",
+                                                    onpointerdown: (o_e)=>{o_module.f_update_pointerdown_trn(
+                                                        o_state.o_dedicated_to_overlay, 
+                                                        o_e
+                                                    )},
+                                                    innerText: 'translate',
+                                                  },
+                                                  {
+                                                    s_tag: "button", 
+                                                    style: "position:absolute; bottom:0;right:0",
+                                                    onpointerdown: (o_e)=>{o_module.f_update_pointerdown_scl(
+                                                        o_state.o_dedicated_to_overlay, 
+                                                        o_e
+                                                    )},
+                                                    innerText: 'scl',
+                                                  }, 
+                                                  {
+                                                    s_tag: "button", 
+                                                    style: "position:absolute; bottom:0;left:0",
+                                                    onpointerdown: (o_e)=>{o_module.f_update_pointerdown_trn(
+                                                        o_state.o_dedicated_to_overlay, 
+                                                        o_e
+                                                    )},
+                                                    innerText: 'translate',
+                                                  },  
+                                                ], 
+                                                o_state.o_dedicated_to_overlay
+                                            ), 
+                                        ]
+                                    },
                                     {
                                         innerText: "<",
                                         s_tag: "button", 
