@@ -122,6 +122,31 @@ let f_handler = async function(o_request){
             }
         );
     }
+    if(o_url.pathname == '/f_o_data_from_cache'){
+        let o_data = await f_o_data__from_cache();
+        return new Response(
+            JSON.stringify(o_data),
+            { 
+                headers: {
+                    'Content-type': "application/json"
+                }
+            }
+        );
+    }
+    if(o_url.pathname == '/f_update_settings'){
+        let o_param = await o_request.json();
+        let o_data = await f_o_data__from_cache();
+        Object.assign(o_data, o_param);
+        await f_update_o_data__in_cache(o_data);
+        return new Response(
+            JSON.stringify('success'),
+            { 
+                headers: {
+                    'Content-type': "application/json"
+                }
+            }
+        );
+    }
     if(o_url.pathname == '/f_o_folder'){
         let o_param = await o_request.json();
         console.log(o_param)

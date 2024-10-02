@@ -11,12 +11,9 @@ import {
 }
 from 'https://deno.land/x/f_o_html_from_o_js@3.9/mod.js'
 
-let o_module = await import('https://deno.land/x/f_o_html_from_o_js@3.9/jsh_modules/translatable_scalable_window/mod.js');
+let o_mod_translatable_scalable_window = await import('https://deno.land/x/f_o_html_from_o_js@4.0.3/localhost/jsh_modules/translatable_scalable_window/mod.js');
 
 
-
-
-document.body.appendChild(o)
 import {
     f_o_webgl_program,
     f_delete_o_webgl_program,
@@ -34,16 +31,18 @@ let o_folder__root = await ( await fetch('./f_o_folder', {method: "post", body: 
 let a_o_folder__path = [
     o_folder__root
 ];
+let o_data__from_cache = await ( await fetch('./f_o_data_from_cache')).json();
+console.log(o_data__from_cache)
 let o_state = {
-    o_dedicated_to_overlay: {
+    n_scl_x_nor_imagegallery: 0.1,
+    o_state__overlay_image_gallery: (o_data__from_cache?.o_state__overlay_image_gallery) ? o_data__from_cache.o_state__overlay_image_gallery : {
         o_scl: {n_x: 500, n_y: 500}, 
         o_trn: {n_x: 200, n_y: 200}, 
-        a_s_css_propval: [
-            'background: blue'
-        ]
+        b_render: false,
+        s_style: "background: blue"
     },
     o_webgl_program: null,
-    a_o_folder__path,
+    a_o_folder__path: (o_data__from_cache.a_o_folder__path) ? o_data__from_cache.a_o_folder__path : a_o_folder__path ,
     o_folder__root,
     a_o_image: [],
     s_filter: ".jpg .png",
@@ -51,6 +50,7 @@ let o_state = {
     o_entry: null,
     s_name_img: '', 
     n_idx_a_o_entry: 0,
+    b_render_o_js__overlay_image_gallery: false,
 }
 
 
@@ -66,18 +66,29 @@ f_add_css(
         position:absolute;
         botton: 0;
         left : 0;
-        width:100vw;
-        max-width:100vw;
+        width:100%;
+        height: 100%;
+        align-items:center;
+        max-width:100%;
         overflow-x:scroll;
         overflow-y: hidden;
         display:flex;
+        flex-wrap:wrap;
         flex-direction:row;
     }
+    .o_entry_name{
+        position:absolute; 
+        bottom:0;
+        left: 0;
+        display:none;
+    }
+    .o_entry_name:hover{
+        display:block;
+    }
     .o_entry{
-        min-width: 10vw;
-        max-width: 10vw;
-        min-height: 10vw;
-        max-height: 10vw;
+        aspect-ratio: 1 / 1;
+        display: flex;
+        align-items: center;
         object-fit:cover;
     }
     .s_o_img_s_name{
@@ -225,7 +236,19 @@ let o = await f_o_html__and_make_renderable(
             {
                 class: "inputs", 
                 a_o: [
-
+                    {
+                        s_tag: "button", 
+                        onclick: async ()=>{
+                            o_state.o_state__overlay_image_gallery.b_render = !o_state.o_state__overlay_image_gallery.b_render;
+                            await o_state.o_state__overlay_image_gallery.o_js._f_render();
+                        },
+                        a_o: [
+                            {
+                                class:`fa-solid fa-images`, 
+                                style: 'padding-right: 1rem'
+                            },
+                        ]
+                    },
                     f_o_assigned(
                         ()=>{
   
@@ -234,66 +257,113 @@ let o = await f_o_html__and_make_renderable(
                                 a_o: [
                                     {
                                         a_o: [
-                                            o_module.f_o_js( // this will add the variables to the state
+                                            o_mod_translatable_scalable_window.f_o_js( // this will add the variables to the state
                                                 [
-                                                ... (new Array(20)).fill(0).map(
-                                                    n =>{
-                                                        let s_rel_x = ['left', 'right'][parseInt(Math.random()*2)]
-                                                        let s_rel_y = ['top', 'bottom'][parseInt(Math.random()*2)]
-                                                        let n_x_nor = Math.random()*50;
-                                                        let n_y_nor = Math.random()*50;
-                                                        let s = ['scl', 'trn'][parseInt(Math.random()*2)];
-                                
-                                                        return {
-                                                            s_tag: "button", 
-                                                            style: `position:absolute; ${s_rel_x}:${n_x_nor}%;${s_rel_y}:${n_y_nor}%`,
-                                                            onpointerdown: (o_e)=>{o_module[`f_update_pointerdown_${s}`](
-                                                                o_state.o_dedicated_to_overlay, 
+                                                    f_o_assigned(
+                                                        {
+                                                            f_after_f_o_html__and_make_renderable: (o_e)=>{                        
+                                                                o_e.scrollTo(
+                                                                    o_state.n_scroll_left, 
+                                                                    0
+                                                                )
+                                                            },
+                                                            f_o_jsh: ()=>{
+                                                                return {
+                                                                    class: "a_o_entry",
+                                                                    onscroll: (o_e)=>{
+                                                                        o_state.n_scroll_left = o_e.target.scrollLeft
+                                                                    },
+                                                                    a_o: o_state.a_o_entry.map(o_entry=>{
+                                                                        return {
+                                                                            class: "o_entry clickable", 
+                                                                            style: [
+                                                                                `padding: 0`,       
+                                                                                `flex-basis: ${o_state.n_scl_x_nor_imagegallery*100}%`,
+                                                                            ].join(`;`),
+                                                                            onpointerdown: async ()=>{
+                                                                                let n_idx = o_state.a_o_entry.indexOf(o_entry);
+                                                                                await f_update_from_n_idx_a_o_entry(n_idx)
+                                                                            },
+                                                                            a_o: [
+                                                                                {   
+                                                                                    class: "o_entry_name",
+                                                                                    innerText: o_entry.name
+                                                                                }, 
+                                                                                ...[
+                                                                                    (o_entry?.o_image)
+                                                                                    ? {
+                                                                                        s_tag: 'img', 
+                                                                                        src: o_entry.o_image.o_object_url
+                                                                                    }
+                                                                                    : 
+                                                                                    false
+                                                                                ].filter(v=>v)
+                                                                            ]
+                                                                        }
+                                                                    })
+                                                                }
+                                                            }, 
+                                                        },
+                                                        'o_js__image_gallery', 
+                                                        o_state
+                                                    ),
+                                                    {
+                                                    style: "position:absolute; bottom:0;right:0",
+                                                    a_o: [
+                                                        {
+                                                            s_tag: 'button', 
+                                                            onclick: async ()=>{
+                                                                o_state.n_scl_x_nor_imagegallery = Math.min(
+                                                                    o_state.n_scl_x_nor_imagegallery+0.025,
+                                                                    1.0 
+                                                                );
+                                                                await o_state.o_js__image_gallery._f_render();
+
+                                                            },
+                                                            a_o: [{class: "fa-solid fa-magnifying-glass-plus"}]
+                                                        },
+                                                        {
+                                                            s_tag: 'button', 
+                                                            onclick: async ()=>{
+                                                                o_state.n_scl_x_nor_imagegallery = Math.max(
+                                                                    o_state.n_scl_x_nor_imagegallery-0.025,
+                                                                    0.025
+                                                                );
+                                                                await o_state.o_js__image_gallery._f_render();
+                                                            },
+                                                            a_o: [{class: "fa-solid fa-magnifying-glass-minus"}]
+                                                        },
+                                                        {
+                                                            class: "clickable",
+                                                            onpointerdown: (o_e)=>{o_mod_translatable_scalable_window.f_update_pointerdown_trn(
+                                                                o_state.o_state__overlay_image_gallery, 
                                                                 o_e
                                                             )},
-                                                            innerText: s
-                                                          }
-                                                    }
-                                                ),
-                                                  {
-                                                    s_tag: "button", 
-                                                    style: "position:absolute; top:0;left:0",
-                                                    onpointerdown: (o_e)=>{o_module.f_update_pointerdown_scl(
-                                                        o_state.o_dedicated_to_overlay, 
-                                                        o_e
-                                                    )},
-                                                    innerText: 'scale',
-                                                  }, 
-                                                  {
-                                                    s_tag: "button", 
-                                                    style: "position:absolute; top:0;right:0",
-                                                    onpointerdown: (o_e)=>{o_module.f_update_pointerdown_trn(
-                                                        o_state.o_dedicated_to_overlay, 
-                                                        o_e
-                                                    )},
-                                                    innerText: 'translate',
-                                                  },
-                                                  {
-                                                    s_tag: "button", 
-                                                    style: "position:absolute; bottom:0;right:0",
-                                                    onpointerdown: (o_e)=>{o_module.f_update_pointerdown_scl(
-                                                        o_state.o_dedicated_to_overlay, 
-                                                        o_e
-                                                    )},
-                                                    innerText: 'scl',
-                                                  }, 
-                                                  {
-                                                    s_tag: "button", 
-                                                    style: "position:absolute; bottom:0;left:0",
-                                                    onpointerdown: (o_e)=>{o_module.f_update_pointerdown_trn(
-                                                        o_state.o_dedicated_to_overlay, 
-                                                        o_e
-                                                    )},
-                                                    innerText: 'translate',
-                                                  },  
+                                                            a_o:[
+                                                                {
+                                                                    s_tag: "i", 
+                                                                    class: "fa-solid fa-maximize"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            class: "clickable",
+                                                            onpointerdown: (o_e)=>{o_mod_translatable_scalable_window.f_update_pointerdown_scl(
+                                                                o_state.o_state__overlay_image_gallery, 
+                                                                o_e
+                                                            )},
+                                                            a_o:[
+                                                                {
+                                                                    s_tag: "i", 
+                                                                    class: "fa-solid fa-up-right-and-down-left-from-center"
+                                                                }
+                                                            ]
+                                                        }, 
+                                                    ]
+                                                    }, 
                                                 ], 
-                                                o_state.o_dedicated_to_overlay
-                                            ), 
+                                                o_state.o_state__overlay_image_gallery
+                                            )
                                         ]
                                     },
                                     {
@@ -425,6 +495,14 @@ let o = await f_o_html__and_make_renderable(
                                 // console.log(s)
                                 return o.isFile && s
                             });
+                            for(let o_entry of o_state.a_o_entry){
+                                f_o_image_from_s_path(`${o_state.a_o_folder__path.map(o=>o.o_entry.name).join('/')}/${o_entry?.name}`).then(o_image =>{
+                                    o_entry.o_image = o_image
+                                    o_state.a_o_image.push(
+                                        o_image
+                                    )
+                                })
+                            }
                             await o_state?.o_js__img?._f_render();
                             o_state.n_idx_a_o_entry = 0;
                             await f_update_from_n_idx_a_o_entry(o_state.n_idx_a_o_entry);
@@ -591,52 +669,36 @@ let o = await f_o_html__and_make_renderable(
                     await f_update_from_n_idx_a_o_entry(o_state.n_idx_a_o_entry-1)
                 }
             }, 
-            f_o_assigned(
-                {
-                    f_after_f_o_html__and_make_renderable: (o_e)=>{                        
-                        o_e.scrollTo(
-                            o_state.n_scroll_left, 
-                            0
-                        )
-                    },
-                    f_o_jsh: ()=>{
-                        return {
-                            class: "a_o_entry",
-                            onscroll: (o_e)=>{
-                                o_state.n_scroll_left = o_e.target.scrollLeft
-                            },
-                            a_o: o_state.a_o_entry.map(o_entry=>{
-                                return {
-                                    class: "o_entry clickable", 
-                                    onpointerdown: async ()=>{
-                                        let n_idx = o_state.a_o_entry.indexOf(o_entry);
-                                        await f_update_from_n_idx_a_o_entry(n_idx)
-                                    },
-                                    a_o: [
-                                        {
-                                            innerText: o_entry.name
-                                        }, 
-                                        ...[
-                                            (o_entry?.o_image)
-                                            ? {
-                                                s_tag: 'img', 
-                                                src: o_entry.o_image.o_object_url
-                                            }
-                                            : 
-                                            false
-                                        ].filter(v=>v)
-                                    ]
-                                }
-                            })
-                        }
-                    }, 
-                },
-                'o_js__a_o_entry', 
-                o_state
-            )
+
         ]
     }
 );
+
+let f_s_json_stringified_without_circular = function(o){
+    // Note: cache should not be re-used by repeated calls to JSON.stringify.
+    var cache = [];
+    let s = JSON.stringify(o, (key, value) => {
+    if (typeof value === 'object' && value !== null) {
+        // Duplicate reference found, discard key
+        if (cache.includes(value)) return;
+
+        // Store value in our collection
+        cache.push(value);
+    }
+        return value;
+    });
+    cache = null; // Enable garbage collection
+    return s
+}
+window.setInterval(async ()=>{
+    // autosave
+
+    let o_update = await ( await fetch('./f_update_settings', {method: "post", body: f_s_json_stringified_without_circular({
+        a_o_folder__path: o_state.a_o_folder__path, 
+        o_state__overlay_image_gallery: Object.assign({},o_state.o_state__overlay_image_gallery)
+    })})).json();
+
+}, 1000)
 
 let f_update_from_n_idx_a_o_entry = async function(n_idx){
     if(o_state.a_o_entry.length == 0){return}
@@ -647,7 +709,7 @@ let f_update_from_n_idx_a_o_entry = async function(n_idx){
     o_state.o_entry.o_image = o_state.o_image;
 
     await o_state.o_js__img._f_render();
-    await o_state.o_js__a_o_entry._f_render();
+    await o_state.o_js__image_gallery._f_render();
 
 }
 
